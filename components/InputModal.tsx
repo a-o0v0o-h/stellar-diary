@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 type FormData = {
   content: string;
 };
 
 export default function InputModal() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   const {
@@ -24,6 +26,7 @@ export default function InputModal() {
 
       reset();
       setIsOpen(false);
+      router.refresh();
     } catch (e) {
       console.error(e);
     }
@@ -47,7 +50,7 @@ export default function InputModal() {
       {/* モーダル */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={() => setIsOpen(false)}
         >
           <div
