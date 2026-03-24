@@ -23,9 +23,9 @@ export async function POST(req: NextRequest) {
     await prisma.diary.create({
       data: {
         content,
-        emotion: aiResult.emotion,
-        energy: aiResult.energy,
-        intensity: aiResult.intensity,
+        emotion: aiResult.emotion + jitter(),
+        energy: aiResult.energy + jitter(),
+        intensity: aiResult.intensity + jitter(),
       },
     });
 
@@ -34,3 +34,5 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ isOk: false });
 }
+
+const jitter = () => (Math.random() - 0.5) * 10;
