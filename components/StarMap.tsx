@@ -2,6 +2,7 @@
 
 import { Diary } from "@/generated/prisma/client";
 import { useEffect, useMemo, useState } from "react";
+import DiaryDetails from "./DiaryDetails";
 
 type Star = {
   id: string;
@@ -44,6 +45,7 @@ export default function StarMap({ diaries }: Props) {
 
       return {
         id: diary.id,
+        content: diary.content,
         x,
         y,
         size,
@@ -60,17 +62,20 @@ export default function StarMap({ diaries }: Props) {
       {mappedStars.map((star) => (
         <div
           key={star.id}
-          className="absolute rounded-full bg-white"
-          style={{
-            left: star.x,
-            top: star.y,
-            width: star.size,
-            height: star.size,
-            opacity: star.opacity,
-            boxShadow: `0 0 ${star.size * 2}px rgba(255,255,255,0.8)`,
-            transform: "translate(-50%, -50%)",
-          }}
-        />
+          className="absolute size-fit"
+          style={{ left: star.x, top: star.y }}
+        >
+          <button
+            key={star.id}
+            className={`bg-white rounded-full cursor-pointer`}
+            popoverTarget={`details-${star.id}`}
+            style={{
+              width: star.size,
+              height: star.size,
+            }}
+          />
+          <DiaryDetails id={star.id} content={star.content} />
+        </div>
       ))}
 
       {/* うっすらノイズ（雰囲気） */}
