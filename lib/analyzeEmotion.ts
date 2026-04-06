@@ -31,7 +31,7 @@ intensity: 強さ
       intensity: emotions.intensity ?? 50,
       isOk: true,
     };
-  } catch (e) {
+  } catch {
     return {
       isOk: false,
     };
