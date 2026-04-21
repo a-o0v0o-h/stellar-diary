@@ -12,6 +12,10 @@ type Props = {
 type MappedStar = {
   id: string;
   content: string;
+  emotion: number;
+  energy: number;
+  intensity: number;
+  createdAt: Date;
   x: number;
   y: number;
   size: number;
@@ -44,6 +48,10 @@ export default function StarMap({ diaries, now }: Props) {
         return {
           id: diary.id,
           content: diary.content,
+          emotion: diary.emotion,
+          energy: diary.energy,
+          intensity: diary.intensity,
+          createdAt: diary.createdAt,
           x,
           y,
           size,
@@ -72,7 +80,14 @@ export default function StarMap({ diaries, now }: Props) {
               opacity: star.opacity,
             }}
           />
-          <DiaryDetails id={star.id} content={star.content} />
+          <DiaryDetails
+            id={star.id}
+            content={star.content}
+            emotion={star.emotion}
+            energy={star.energy}
+            intensity={star.intensity}
+            createdAt={star.createdAt}
+          />
         </div>
       ))}
     </div>
