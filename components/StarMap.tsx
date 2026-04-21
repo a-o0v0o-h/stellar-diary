@@ -62,11 +62,12 @@ export default function StarMap({ diaries, now }: Props) {
         >
           <button
             key={star.id}
-            className={`bg-white rounded-full cursor-pointer`}
+            className="bg-white rounded-full cursor-pointer shadow-[0_0_6px_2px_rgba(255,255,255,0.6),0_0_12px_4px_rgba(200,220,255,0.3)]"
             popoverTarget={`details-${star.id}`}
             style={{
               width: star.size,
               height: star.size,
+              opacity: star.opacity,
             }}
           />
           <DiaryDetails id={star.id} content={star.content} />
