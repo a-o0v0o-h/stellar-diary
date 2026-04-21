@@ -61,15 +61,23 @@ export default function InputModal() {
               e.stopPropagation();
             }}
           >
-            <h2 className="text-white text-lg mb-4">🌙 今日のひとこと</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-white text-lg">今日のひとこと</h2>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-400 hover:text-gray-300 cursor-pointer text-xl leading-none"
+              >
+                ✕
+              </button>
+            </div>
 
             <form onSubmit={handleSubmit(onSubmit)}>
               <textarea
                 {...register("content", { required: true })}
                 placeholder="どんな1日だった？"
-                className="w-full h-32 p-4 rounded-lg 
-                bg-black text-white placeholder-gray-500 
-                border border-gray-700 
+                className="w-full h-32 p-4 rounded-lg
+                bg-black text-white placeholder-gray-500
+                border border-gray-700
                 focus:outline-none focus:ring-2 focus:ring-indigo-500
                 resize-none"
               />
@@ -77,8 +85,8 @@ export default function InputModal() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-5 w-full py-2 rounded-full 
-                bg-indigo-500 hover:bg-indigo-400 
+                className="mt-5 w-full py-2 rounded-full
+                bg-indigo-500 hover:bg-indigo-400
                 disabled:opacity-50
                 text-white font-medium
                 cursor-pointer"
@@ -86,13 +94,6 @@ export default function InputModal() {
                 {isSubmitting ? "星を作っています..." : "星にする ✨"}
               </button>
             </form>
-
-            <button
-              onClick={() => setIsOpen(false)}
-              className="mt-3 text-sm text-gray-400 hover:text-gray-300 cursor-pointer"
-            >
-              閉じる
-            </button>
           </div>
         </div>
       )}
