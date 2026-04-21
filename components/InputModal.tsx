@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { RiAddLine, RiCloseLine } from "react-icons/ri";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -38,13 +39,13 @@ export default function InputModal() {
       {/* ＋ボタン */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full 
-        bg-indigo-500 hover:bg-indigo-400 
-        text-white text-2xl shadow-lg 
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full
+        bg-indigo-500 hover:bg-indigo-400
+        text-white shadow-lg
         flex items-center justify-center
         cursor-pointer"
       >
-        ＋
+        <RiAddLine size={28} />
       </button>
 
       {/* モーダル */}
@@ -65,9 +66,9 @@ export default function InputModal() {
               <h2 className="text-white text-lg">今日のひとこと</h2>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-300 cursor-pointer text-xl leading-none"
+                className="text-gray-400 hover:text-gray-300 cursor-pointer"
               >
-                ✕
+                <RiCloseLine size={22} />
               </button>
             </div>
 
