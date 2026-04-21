@@ -92,7 +92,7 @@ export default function InputModal() {
                 text-white font-medium
                 cursor-pointer"
               >
-                {isSubmitting ? "星を作っています..." : "星にする ✨"}
+                {isSubmitting ? "星を作っています..." : "星をつくる"}
               </button>
             </form>
           </div>
