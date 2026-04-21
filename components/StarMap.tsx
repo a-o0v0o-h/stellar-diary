@@ -1,7 +1,7 @@
 "use client";
 
 import { Diary } from "@/generated/prisma/client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DiaryDetails from "./DiaryDetails";
 
 type Props = {
@@ -19,16 +19,18 @@ type MappedStar = {
 };
 
 export default function StarMap({ diaries, now }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [mappedStars, setMappedStars] = useState<MappedStar[]>([]);
 
   useEffect(() => {
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+    // 星をコンテナ内に収めるように座標を計算
+    const width = containerRef.current?.clientWidth ?? window.innerWidth;
+    const height = containerRef.current?.clientHeight ?? window.innerHeight;
 
     setMappedStars(
       diaries.map((diary) => {
-        const x = (diary.emotion / 100) * windowWidth;
-        const y = windowHeight - (diary.energy / 100) * windowHeight;
+        const x = (diary.emotion / 100) * width;
+        const y = height - (diary.energy / 100) * height;
 
         const size = 2 + diary.intensity / 10;
 
@@ -47,12 +49,12 @@ export default function StarMap({ diaries, now }: Props) {
           size,
           opacity,
         };
-      })
+      }),
     );
   }, [diaries, now]);
 
   return (
-    <div className="relative w-full h-full">
+    <div ref={containerRef} className="relative w-full h-full">
       {/* 星 */}
       {mappedStars.map((star) => (
         <div
