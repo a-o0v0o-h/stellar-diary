@@ -8,7 +8,7 @@ export default async function Home() {
   const now = Date.now();
 
   return (
-    <main className="min-h-screen min-w-screen bg-black p-4">
+    <main className="h-screen w-screen overflow-hidden bg-black p-4">
       <StarMap diaries={diaries} now={now} />
       <InputModal />
     </main>
