@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stellar Diary
 
-## Getting Started
+つぶやきを星空で可視化する日記アプリ
+日々の記録が夜空の星として広がり、感情・エネルギー・強度によって星の位置・サイズ・明るさが変わります。新しい記録ほど明るく輝き、時間とともに静かに薄れていきます。
 
-First, run the development server:
+## 星への変換ルール
+
+テキストを投稿すると OpenAI API が3つのパラメータを 0〜100 で解析し、星の見た目に反映されます。
+
+| パラメータ                  | 星の表示                                         |
+| --------------------------- | ------------------------------------------------ |
+| **ポジティブ度**（emotion） | 星の位置（左右）。ポジティブなほど右へ           |
+| **エネルギー**（energy）    | 星の位置（上下）。エネルギーが高いほど上へ       |
+| **感情の強さ**（intensity） | 星のサイズ。強いほど大きく                       |
+| **投稿日時**                | 星の明るさ。新しいほど明るく、30日で最も暗くなる |
+
+## Tech Stack
+
+- **Next.js** (App Router)
+- **Prisma** + SQLite
+- **Tailwind CSS v4**
+- **OpenAI API**
+
+## Setup
+
+### 1. リポジトリをクローン
+
+```bash
+git clone https://github.com/a-o0v0o-h/stellar-diary.git
+cd stellar-diary
+```
+
+### 2. 依存関係をインストール
+
+```bash
+npm install
+```
+
+### 3. 環境変数を設定
+
+`.env` ファイルをルートに作成します。
+
+```env
+DATABASE_URL="file:./dev.db"
+OPENAI_API_KEY="your_openai_api_key"
+```
+
+### 4. データベースをセットアップ
+
+```bash
+npx prisma migrate deploy
+npx prisma generate
+```
+
+### 5. 開発サーバーを起動
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[http://localhost:3000](http://localhost:3000) をブラウザで開いてください。
