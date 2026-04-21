@@ -31,6 +31,7 @@ export default function StarMap({ diaries, now }: Props) {
     const width = containerRef.current?.clientWidth ?? window.innerWidth;
     const height = containerRef.current?.clientHeight ?? window.innerHeight;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMappedStars(
       diaries.map((diary) => {
         const x = (diary.emotion / 100) * width;
