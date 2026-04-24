@@ -5,6 +5,7 @@ import { RiAddLine, RiCloseLine } from "react-icons/ri";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 type FormData = {
   content: string;
@@ -28,8 +29,10 @@ export default function InputModal() {
       reset();
       setIsOpen(false);
       router.refresh();
+      toast.success("星が生まれました");
     } catch (e) {
       console.error(e);
+      toast.error("投稿に失敗しました。もう一度試してください。");
     }
   };
 

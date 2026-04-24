@@ -4,8 +4,7 @@ import { prisma } from "@/lib/prisma";
 import dayjs from "dayjs";
 
 export default async function Home() {
-  // eslint-disable-next-line react-hooks/purity
-  const now = Date.now();
+  const now = dayjs().unix();
   const thirtyDaysAgo = dayjs().subtract(30, "day").toDate();
   const diaries = await prisma.diary.findMany({
     where: { createdAt: { gte: thirtyDaysAgo } },

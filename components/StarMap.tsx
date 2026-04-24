@@ -1,6 +1,7 @@
 "use client";
 
 import { Diary } from "@/generated/prisma/client";
+import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
 import DiaryDetails from "./DiaryDetails";
 
@@ -25,24 +26,26 @@ type MappedStar = {
 export default function StarMap({ diaries, now }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mappedStars, setMappedStars] = useState<MappedStar[]>([]);
+  const latestStarIdRef = useRef<string | null>(null);
+  const [newStarId, setNewStarId] = useState<string | null>(null);
+  const newStarRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     // 星をコンテナ内に収めるように座標を計算
     const width = containerRef.current?.clientWidth ?? window.innerWidth;
     const height = containerRef.current?.clientHeight ?? window.innerHeight;
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMappedStars(
-      diaries.map((diary) => {
+    const stars = diaries
+      .map((diary) => {
         const x = (diary.emotion / 100) * width;
         const y = height - (diary.energy / 100) * height;
 
         const size = 2 + diary.intensity / 10;
 
-        const created = new Date(diary.createdAt).getTime();
+        const created = dayjs(diary.createdAt).unix();
         const age = now - created;
 
-        const maxAge = 1000 * 60 * 60 * 24 * 30;
+        const maxAge = 60 * 60 * 24 * 30;
         const normalized = 1 - Math.min(age / maxAge, 1);
         const opacity = 0.3 + normalized * 0.7;
 
@@ -58,13 +61,28 @@ export default function StarMap({ diaries, now }: Props) {
           size,
           opacity,
         };
-      }),
-    );
+      })
+      .sort((a, b) => dayjs(a.createdAt).unix() - dayjs(b.createdAt).unix());
+
+    const latest = stars.at(-1);
+    if (latest) {
+      if (latestStarIdRef.current !== null && latest.id !== latestStarIdRef.current) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setNewStarId(latest.id);
+      }
+      latestStarIdRef.current = latest.id;
+    }
+
+    setMappedStars(stars);
   }, [diaries, now]);
+
+  useEffect(() => {
+    if (!newStarId) return;
+    newStarRef.current?.click();
+  }, [newStarId]);
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
-      {/* 星 */}
       {mappedStars.map((star) => (
         <div
           key={star.id}
@@ -72,8 +90,8 @@ export default function StarMap({ diaries, now }: Props) {
           style={{ left: star.x, top: star.y }}
         >
           <button
-            key={star.id}
-            className="bg-white rounded-full cursor-pointer shadow-[0_0_6px_2px_rgba(255,255,255,0.6),0_0_12px_4px_rgba(200,220,255,0.3)]"
+            ref={star.id === newStarId ? newStarRef : undefined}
+            className={`bg-white rounded-full cursor-pointer shadow-[0_0_6px_2px_rgba(255,255,255,0.6),0_0_12px_4px_rgba(200,220,255,0.3)] ${star.id === newStarId ? "star-appear" : ""}`}
             popoverTarget={`details-${star.id}`}
             style={{
               width: star.size,
