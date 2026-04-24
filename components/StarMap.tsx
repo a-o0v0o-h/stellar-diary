@@ -91,7 +91,7 @@ export default function StarMap({ diaries, now }: Props) {
         >
           <button
             ref={star.id === newStarId ? newStarRef : undefined}
-            className="bg-white rounded-full cursor-pointer shadow-[0_0_6px_2px_rgba(255,255,255,0.6),0_0_12px_4px_rgba(200,220,255,0.3)]"
+            className={`bg-white rounded-full cursor-pointer shadow-[0_0_6px_2px_rgba(255,255,255,0.6),0_0_12px_4px_rgba(200,220,255,0.3)] ${star.id === newStarId ? "star-appear" : ""}`}
             popoverTarget={`details-${star.id}`}
             style={{
               width: star.size,
