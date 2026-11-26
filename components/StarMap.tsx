@@ -1,6 +1,6 @@
 "use client";
 
-import { Diary } from "@/generated/prisma/client";
+import type { Diary } from "@/lib/diaryStore";
 import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
 import DiaryDetails from "./DiaryDetails";
@@ -16,7 +16,8 @@ type MappedStar = {
   emotion: number;
   energy: number;
   intensity: number;
-  createdAt: Date;
+  createdAt: string;
+  isSample?: boolean;
   x: number;
   y: number;
   size: number;
@@ -56,6 +57,7 @@ export default function StarMap({ diaries, now }: Props) {
           energy: diary.energy,
           intensity: diary.intensity,
           createdAt: diary.createdAt,
+          isSample: diary.isSample,
           x,
           y,
           size,
@@ -106,6 +108,7 @@ export default function StarMap({ diaries, now }: Props) {
             energy={star.energy}
             intensity={star.intensity}
             createdAt={star.createdAt}
+            isSample={star.isSample}
           />
         </div>
       ))}

@@ -15,10 +15,30 @@
 | **感情の強さ**（intensity） | 星のサイズ。強いほど大きく                       |
 | **投稿日時**                | 星の明るさ。新しいほど明るく、30日で最も暗くなる |
 
+## データの保存先について
+
+日記はサーバーには保存せず、**ブラウザの localStorage にだけ保存**しています。
+
+- URL を開くだけで誰でも試せるように、DB を用意しなくても動く構成にしました
+- 日記という個人的な内容をサーバーに残さないためでもあります
+- 感情の解析のため、投稿した文章だけは OpenAI API に送信します
+
+DB（Prisma + SQLite）に保存していた以前の版は [`prisma` ブランチ](https://github.com/a-o0v0o-h/stellar-diary/tree/prisma) に残しています。
+
+## API の利用料金への対策
+
+公開環境で OpenAI API を使うため、意図しない大量利用への対策を入れています。
+
+- 1 回の投稿は 280 文字まで（画面とサーバーの両方でチェック）
+- 解析は IP ごとに 1 日 10 回まで（`DAILY_ANALYZE_LIMIT` で変更可能）
+- OpenAI 側はクレジットの前払い + 自動チャージなしで運用し、上限を超えて請求されないようにする
+
+※ 回数制限はサーバーのメモリで数えているため、サーバーレス環境ではインスタンスごとのカウントになります。料金の上限は OpenAI 側の設定で担保しています。
+
 ## Tech Stack
 
 - **Next.js** (App Router)
-- **Prisma** + SQLite
+- **localStorage**（`useSyncExternalStore` で購読）
 - **Tailwind CSS v4**
 - **OpenAI API**
 
@@ -39,24 +59,18 @@ npm install
 
 ### 3. 環境変数を設定
 
-`.env` ファイルをルートに作成します。
+`.env.local` ファイルをルートに作成します。
 
 ```env
-DATABASE_URL="file:./dev.db"
 OPENAI_API_KEY="your_openai_api_key"
+# 任意: IP ごとの 1 日あたりの解析回数（デフォルト 10）
+DAILY_ANALYZE_LIMIT=10
 ```
 
-### 4. データベースをセットアップ
-
-```bash
-npx prisma migrate deploy
-npx prisma generate
-```
-
-### 5. 開発サーバーを起動
+### 4. 開発サーバーを起動
 
 ```bash
 npm run dev
 ```
 
-[http://localhost:3000](http://localhost:3000) をブラウザで開いてください。
+[http://localhost:3000](http://localhost:3000) をブラウザで開いてください。初めて開いたときは、サンプルの星が表示されます。
