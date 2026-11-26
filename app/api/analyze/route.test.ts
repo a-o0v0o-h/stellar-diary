@@ -50,7 +50,7 @@ describe("POST /api/analyze", () => {
   it.each([
     ["空文字", { content: "" }],
     ["空白だけ", { content: "   " }],
-    ["281 文字", { content: "あ".repeat(281) }],
+    ["141 文字", { content: "あ".repeat(141) }],
     ["文字列以外", { content: 123 }],
     ["JSON でない body", "not json"],
   ])("%s は 400 を返し、API を呼ばない", async (_, body) => {
@@ -63,25 +63,25 @@ describe("POST /api/analyze", () => {
     expect(analyzeEmotion).not.toHaveBeenCalled();
   });
 
-  it("280 文字ちょうどは受け付ける", async () => {
+  it("140 文字ちょうどは受け付ける", async () => {
     const { POST } = await loadRoute();
 
-    const res = await POST(request({ content: "あ".repeat(280) }));
+    const res = await POST(request({ content: "あ".repeat(140) }));
 
     expect(res.status).toBe(200);
   });
 
-  it("同じ IP から 11 回目は 429 を返し、API を呼ばない", async () => {
+  it("同じ IP から 4 回目は 429 を返し、API を呼ばない", async () => {
     const { POST } = await loadRoute();
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 3; i++) {
       expect((await POST(request({ content: "x" }))).status).toBe(200);
     }
     const res = await POST(request({ content: "x" }));
 
     expect(res.status).toBe(429);
     expect(await res.json()).toEqual({ isOk: false, reason: "rate_limited" });
-    expect(analyzeEmotion).toHaveBeenCalledTimes(10);
+    expect(analyzeEmotion).toHaveBeenCalledTimes(3);
   });
 
   it("解析に失敗したときは 503 を返す", async () => {
