@@ -1,5 +1,8 @@
 # Stellar Diary
 
+[![CI](https://github.com/a-o0v0o-h/stellar-diary/actions/workflows/ci.yml/badge.svg)](https://github.com/a-o0v0o-h/stellar-diary/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/a-o0v0o-h/stellar-diary/actions/workflows/codeql.yml/badge.svg)](https://github.com/a-o0v0o-h/stellar-diary/actions/workflows/codeql.yml)
+
 つぶやきを星空で可視化する日記アプリ
 日々の記録が夜空の星として広がり、感情・エネルギー・強度によって星の位置・サイズ・明るさが変わります。新しい記録ほど明るく輝き、時間とともに静かに薄れていきます。
 <img width="1177" height="776" alt="スクリーンショット 2026-04-21 23 56 09" src="https://github.com/user-attachments/assets/db4c0221-2fe0-4be7-a251-a9d90a1aabdb" />
@@ -41,6 +44,7 @@ DB（Prisma + SQLite）に保存していた以前の版は [`prisma` ブラン�
 - **localStorage**（`useSyncExternalStore` で購読）
 - **Tailwind CSS v4**
 - **OpenAI API**
+- **Vitest**（テスト）
 
 ## Setup
 
@@ -74,3 +78,28 @@ npm run dev
 ```
 
 [http://localhost:3000](http://localhost:3000) をブラウザで開いてください。初めて開いたときは、サンプルの星が表示されます。
+
+## 開発
+
+```bash
+npm run lint       # ESLint
+npm run typecheck  # 型チェック
+npm test           # テスト（Vitest）
+npm run build      # 本番ビルド
+```
+
+### テスト
+
+API キーがなくても動くように、OpenAI API はモックにしています。
+
+- `app/api/analyze/route.test.ts`：入力チェック（空文字・281 文字など）、回数制限、解析失敗時のレスポンス
+- `lib/analyzeEmotion.test.ts`：AI の返答が崩れていたとき（コードブロック付き・数値以外・JSON でない）の扱い
+- `lib/rateLimit.test.ts`：IP ごとのカウントと 24 時間でのリセット
+- `lib/diaryStore.test.ts`：localStorage の読み書き、壊れたデータ、書き込めない環境、サンプルの星
+
+### CI・脆弱性チェック
+
+- **CI**（GitHub Actions）：PR と `main` への push で lint・型チェック・テスト・ビルドを実行
+- **npm audit**：本番で使うパッケージに high 以上の脆弱性があれば CI を失敗させる
+- **CodeQL**：コードの脆弱性を静的解析（PR・`main` への push・毎週月曜）
+- **Dependabot**：依存パッケージと GitHub Actions の更新 PR を毎週作成

@@ -69,7 +69,6 @@ export default function StarMap({ diaries, now }: Props) {
     const latest = stars.at(-1);
     if (latest) {
       if (latestStarIdRef.current !== null && latest.id !== latestStarIdRef.current) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setNewStarId(latest.id);
       }
       latestStarIdRef.current = latest.id;
