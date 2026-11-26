@@ -26,6 +26,7 @@ const STEPS: Step[] = [
     title: "Stellar Diary へようこそ",
     body: "ひとこと日記を書くと、AI が気持ちを読み取って、星空に星がひとつ生まれます。",
     note: "右上の ? からいつでも見直せます。",
+    target: "help-button",
   },
   {
     title: "画面全体が気持ちの地図",

@@ -68,6 +68,7 @@ export default function DiaryApp() {
       <button
         onClick={() => setIsTutorialReopened(true)}
         onAnimationEnd={() => setIsHelpGlowing(false)}
+        data-tour="help-button"
         aria-label="使い方を見る"
         className={`fixed right-4 top-4 cursor-pointer rounded-full text-gray-500 hover:text-gray-300 ${isHelpGlowing ? "help-glow" : ""}`}
       >
