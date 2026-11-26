@@ -2,11 +2,11 @@
 
 import { RiAddLine, RiCloseLine } from "react-icons/ri";
 import { useForm, useWatch } from "react-hook-form";
-import axios from "axios";
 import { toast } from "sonner";
 import type { AnalyzeResponse } from "@/app/api/analyze/route";
 import { MAX_CONTENT_LENGTH } from "@/lib/constants";
 import type { Diary } from "@/lib/diaryStore";
+import { postJson } from "@/lib/postJson";
 
 type FormData = {
   content: string;
@@ -39,14 +39,10 @@ export default function InputModal({ isOpen, onOpenChange, onCreated }: Props) {
     const content = data.content.trim();
 
     try {
-      const res = await axios.post<AnalyzeResponse>(
-        "/api/analyze",
-        { content },
-        { validateStatus: () => true },
-      );
+      const data = await postJson<AnalyzeResponse>("/api/analyze", { content });
 
-      if (!res.data?.isOk) {
-        const reason = res.data?.reason ?? "unavailable";
+      if (!data?.isOk) {
+        const reason = data?.reason ?? "unavailable";
         toast.error(ERROR_MESSAGES[reason]);
         return;
       }
@@ -54,9 +50,9 @@ export default function InputModal({ isOpen, onOpenChange, onCreated }: Props) {
       onCreated({
         id: crypto.randomUUID(),
         content,
-        emotion: res.data.emotion,
-        energy: res.data.energy,
-        intensity: res.data.intensity,
+        emotion: data.emotion,
+        energy: data.energy,
+        intensity: data.intensity,
         createdAt: new Date().toISOString(),
       });
 

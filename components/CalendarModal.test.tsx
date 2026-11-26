@@ -6,7 +6,7 @@ import type { Diary } from "@/lib/diaryStore";
 const post = vi.fn();
 const toastError = vi.fn();
 
-vi.mock("axios", () => ({ default: { post } }));
+vi.mock("@/lib/postJson", () => ({ postJson: post }));
 vi.mock("sonner", () => ({ toast: { error: toastError } }));
 
 const diary = (id: string, createdAt: string, overrides: Partial<Diary> = {}): Diary => ({
@@ -27,15 +27,13 @@ const renderCalendar = async (diaries: Diary[], onClose = vi.fn()) => {
 };
 
 const okResponse = {
-  data: {
-    isOk: true,
-    comment: "やわらかな光のひと月でした。",
-    quote: {
-      text: "雨が　すきか\nわたしはすきだ",
-      author: "八木重吉",
-      work: "貧しき信徒",
-      source: "https://www.aozora.gr.jp/cards/000013/card542.html",
-    },
+  isOk: true,
+  comment: "やわらかな光のひと月でした。",
+  quote: {
+    text: "雨が　すきか\nわたしはすきだ",
+    author: "八木重吉",
+    work: "貧しき信徒",
+    source: "https://www.aozora.gr.jp/cards/000013/card542.html",
   },
 };
 
@@ -137,7 +135,8 @@ describe("カレンダー", () => {
 
   it("ふりかえったあとも、もう一度つくり直せる", async () => {
     post.mockResolvedValueOnce(okResponse).mockResolvedValueOnce({
-      data: { ...okResponse.data, comment: "静かな星がまたたくひと月でした。" },
+      ...okResponse,
+      comment: "静かな星がまたたくひと月でした。",
     });
     await renderCalendar(THIS_MONTH);
     fireEvent.click(screen.getByRole("button", { name: "この月をふりかえる" }));
@@ -151,7 +150,7 @@ describe("カレンダー", () => {
   });
 
   it("失敗したら理由を知らせる", async () => {
-    post.mockResolvedValue({ data: { isOk: false, reason: "rate_limited" } });
+    post.mockResolvedValue({ isOk: false, reason: "rate_limited" });
     await renderCalendar(THIS_MONTH);
 
     fireEvent.click(screen.getByRole("button", { name: "この月をふりかえる" }));
