@@ -4,6 +4,7 @@ import type { Diary } from "@/lib/diaryStore";
 import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
 import DiaryDetails from "./DiaryDetails";
+import { starSize } from "@/lib/star";
 
 type Props = {
   diaries: Diary[];
@@ -41,7 +42,7 @@ export default function StarMap({ diaries, now }: Props) {
         const x = (diary.emotion / 100) * width;
         const y = height - (diary.energy / 100) * height;
 
-        const size = 2 + diary.intensity / 10;
+        const size = starSize(diary.intensity);
 
         const created = dayjs(diary.createdAt).unix();
         const age = now - created;

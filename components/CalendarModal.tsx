@@ -9,6 +9,7 @@ import type { ReflectResponse } from "@/app/api/reflect/route";
 import { MAX_REFLECTION_DIARIES, MIN_REFLECTION_DIARIES } from "@/lib/constants";
 import type { Diary } from "@/lib/diaryStore";
 import * as reflectionStore from "@/lib/reflectionStore";
+import { starSize } from "@/lib/star";
 import { dayKey, startOfWeek, weekKey } from "@/lib/week";
 
 type Props = {
@@ -25,12 +26,17 @@ const ERROR_MESSAGES = {
   unavailable: "いまはふりかえりを作れません。時間をおいて試してください。",
 } as const;
 
-/** ネガティブは青、ポジティブは金色。強い気持ちほどはっきり光る */
-const markStyle = (emotion: number, intensity: number) => ({
-  backgroundColor: `hsl(${220 - (emotion / 100) * 175} 90% 72%)`,
-  opacity: 0.45 + (intensity / 100) * 0.55,
-  boxShadow: `0 0 ${4 + (intensity / 100) * 6}px hsl(${220 - (emotion / 100) * 175} 90% 72%)`,
-});
+/** 星空と同じ大きさの星。ネガティブは青、ポジティブは金色 */
+const starStyle = ({ emotion, intensity }: Diary) => {
+  const hue = 220 - (emotion / 100) * 175;
+  const size = starSize(intensity);
+  return {
+    width: size,
+    height: size,
+    backgroundColor: `hsl(${hue} 90% 80%)`,
+    boxShadow: `0 0 6px 2px hsl(${hue} 90% 72% / 0.6), 0 0 12px 4px hsl(${hue} 90% 72% / 0.3)`,
+  };
+};
 
 const formatDay = (date: Dayjs) => `${date.month() + 1}月${date.date()}日(${WEEKDAY_OF[date.day()]})`;
 
@@ -269,8 +275,11 @@ export default function CalendarModal({ onClose, diaries }: Props) {
             const isInMonth = day.isSame(month, "month");
             const isSelected = day.isSame(selected, "day");
             const isToday = day.isSame(today, "day");
-            const average = (key: "emotion" | "intensity") =>
-              dayDiaries.reduce((sum, diary) => sum + diary[key], 0) / dayDiaries.length;
+            // いちばん気持ちが強かった日記の星を出す
+            const brightest = dayDiaries.reduce<Diary | undefined>(
+              (max, diary) => (!max || diary.intensity > max.intensity ? diary : max),
+              undefined,
+            );
 
             return (
               <button
@@ -281,17 +290,15 @@ export default function CalendarModal({ onClose, diaries }: Props) {
                 }}
                 aria-pressed={isSelected}
                 aria-label={`${day.month() + 1}月${day.date()}日${dayDiaries.length ? `（日記 ${dayDiaries.length} 件）` : ""}`}
-                className={`flex h-11 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-sm transition-colors
+                className={`flex h-12 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-sm transition-colors
                   ${isSelected ? "bg-indigo-500/30 text-white" : "hover:bg-white/5"}
                   ${isInMonth ? "text-gray-200" : "text-gray-600"}
                   ${isToday && !isSelected ? "ring-1 ring-indigo-300/50" : ""}`}
               >
                 <span>{day.date()}</span>
-                <span
-                  className="size-1.5 rounded-full"
-                  style={dayDiaries.length ? markStyle(average("emotion"), average("intensity")) : undefined}
-                  aria-hidden="true"
-                />
+                <span className="flex size-3 items-center justify-center" aria-hidden="true">
+                  {brightest && <span className="rounded-full" style={starStyle(brightest)} />}
+                </span>
               </button>
             );
           })}
