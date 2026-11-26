@@ -2,7 +2,8 @@
 
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { RiQuestionLine } from "react-icons/ri";
+import { RiCalendarLine, RiQuestionLine } from "react-icons/ri";
+import CalendarModal from "@/components/CalendarModal";
 import InputModal from "@/components/InputModal";
 import StarMap from "@/components/StarMap";
 import Tutorial from "@/components/Tutorial";
@@ -27,6 +28,7 @@ export default function DiaryApp() {
   const [isTutorialReopened, setIsTutorialReopened] = useState(false);
   const [isHelpGlowing, setIsHelpGlowing] = useState(false);
   const [isInputOpen, setIsInputOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   useEffect(() => {
     seedSamplesIfFirstVisit();
@@ -64,6 +66,17 @@ export default function DiaryApp() {
         onOpenChange={setIsInputOpen}
         onCreated={handleCreated}
       />
+
+      <button
+        onClick={() => setIsCalendarOpen(true)}
+        aria-label="カレンダーを開く"
+        className="fixed right-14 top-4 cursor-pointer text-gray-500 hover:text-gray-300"
+      >
+        <RiCalendarLine size={22} />
+      </button>
+      {isCalendarOpen && (
+        <CalendarModal diaries={diaries} onClose={() => setIsCalendarOpen(false)} />
+      )}
 
       <button
         onClick={() => setIsTutorialReopened(true)}
