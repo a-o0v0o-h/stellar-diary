@@ -1,5 +1,8 @@
 # Stellar Diary
 
+> [!NOTE]
+> これは日記を DB（Prisma + SQLite）に保存していた以前の版です。最新版は [`main` ブランチ](https://github.com/a-o0v0o-h/stellar-diary/tree/main) を見てください。
+
 つぶやきを星空で可視化する日記アプリ
 日々の記録が夜空の星として広がり、感情・エネルギー・強度によって星の位置・サイズ・明るさが変わります。新しい記録ほど明るく輝き、時間とともに静かに薄れていきます。
 <img width="1177" height="776" alt="スクリーンショット 2026-04-21 23 56 09" src="https://github.com/user-attachments/assets/db4c0221-2fe0-4be7-a251-a9d90a1aabdb" />
