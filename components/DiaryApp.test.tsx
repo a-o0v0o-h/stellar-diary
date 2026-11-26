@@ -86,7 +86,7 @@ describe("チュートリアル", () => {
 
   it("初めてのチュートリアルを閉じると、? ボタンが光って見直せる場所を教える", async () => {
     await renderApp();
-    expect(screen.getByText("あとで右上の ? からいつでも見直せます。")).toBeTruthy();
+    expect(screen.getByText("右上の ? からいつでも見直せます。")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "スキップ" }));
 
