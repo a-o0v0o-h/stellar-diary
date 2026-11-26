@@ -56,6 +56,19 @@ describe("チュートリアル", () => {
     expect(localStorage.getItem(TUTORIAL_KEY)).not.toBeNull();
   });
 
+  it("照らした ＋ ボタンを押すと、チュートリアルを閉じて入力画面を開く", async () => {
+    await renderApp();
+
+    for (let i = 0; i < 3; i++) {
+      fireEvent.click(screen.getByRole("button", { name: "次へ" }));
+    }
+    fireEvent.click(await screen.findByTestId("tutorial-spotlight"));
+
+    expect(dialog()).toBeNull();
+    expect(screen.getByPlaceholderText("どんな1日だった？")).toBeTruthy();
+    expect(localStorage.getItem(TUTORIAL_KEY)).not.toBeNull();
+  });
+
   it.each([
     ["スキップ", () => fireEvent.click(screen.getByRole("button", { name: "スキップ" }))],
     ["× ボタン", () => fireEvent.click(screen.getByRole("button", { name: "閉じる" }))],

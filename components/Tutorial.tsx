@@ -15,6 +15,8 @@ type Step = {
   target?: string;
   /** 画面全体に星空の軸を重ねて表示する */
   showAxes?: boolean;
+  /** 対象の星の日記の詳細を開いて見せる */
+  openDetails?: boolean;
 };
 
 const STEPS: Step[] = [
@@ -28,9 +30,10 @@ const STEPS: Step[] = [
     showAxes: true,
   },
   {
-    title: "星をタップしてみよう",
-    body: "星をタップすると、その日に書いた日記が読めます。最初はサンプルの星が入っているので、気軽にのぞいてみてください。",
+    title: "星をタップすると日記が読める",
+    body: "その日に書いたひとことと、AI が読み取った気持ちの数値が見られます。最初はサンプルの星が入っているので、気軽にのぞいてみてください。",
     target: "latest-star",
+    openDetails: true,
   },
   {
     title: "日記を書いてみよう",
@@ -47,6 +50,25 @@ const MIN_SPOTLIGHT = 56;
 
 type Rect = { top: number; left: number; width: number; height: number };
 
+const toRect = (r: DOMRect): Rect => ({ top: r.top, left: r.left, width: r.width, height: r.height });
+
+const findTarget = (target: string) =>
+  document.querySelector<HTMLElement>(`[data-tour="${target}"]`);
+
+/** 星のボタンにひもづく日記の詳細（ポップオーバー） */
+const detailsOf = (el: HTMLElement | null) =>
+  el instanceof HTMLButtonElement && el.popoverTargetElement instanceof HTMLElement
+    ? el.popoverTargetElement
+    : null;
+
+const isPopoverOpen = (el: HTMLElement) => {
+  try {
+    return el.matches(":popover-open");
+  } catch {
+    return false;
+  }
+};
+
 const isSameRect = (a: Rect | null, b: Rect | null) =>
   a?.top === b?.top && a?.left === b?.left && a?.width === b?.width && a?.height === b?.height;
 
@@ -54,23 +76,35 @@ const spotlightDiameter = (rect: Rect) =>
   Math.max(Math.max(rect.width, rect.height) + 16, MIN_SPOTLIGHT);
 
 /**
- * data-tour で指定した要素の位置を追いかける。
+ * data-tour で指定した要素と、開いている日記の詳細の位置を追いかける。
  * 画面サイズの変更や星の再配置にもついていけるように、毎フレーム確認する。
  */
 function useTargetRect(target: string | undefined) {
-  const [rect, setRect] = useState<Rect | null>(null);
+  // どの対象の位置かも一緒に持っておき、前のステップの位置が残らないようにする
+  const [state, setState] = useState<{
+    target: string;
+    rect: Rect | null;
+    detailsRect: Rect | null;
+  } | null>(null);
 
   useEffect(() => {
     if (!target) return;
     let frame = 0;
-    let current: Rect | null = null;
+    let current: { rect: Rect | null; detailsRect: Rect | null } | null = null;
 
     const update = () => {
-      const r = document.querySelector(`[data-tour="${target}"]`)?.getBoundingClientRect();
-      const next = r ? { top: r.top, left: r.left, width: r.width, height: r.height } : null;
-      if (!isSameRect(current, next)) {
-        current = next;
-        setRect(next);
+      const el = findTarget(target);
+      const details = detailsOf(el);
+      const rect = el ? toRect(el.getBoundingClientRect()) : null;
+      const detailsRect =
+        details && isPopoverOpen(details) ? toRect(details.getBoundingClientRect()) : null;
+      if (
+        !current ||
+        !isSameRect(current.rect, rect) ||
+        !isSameRect(current.detailsRect, detailsRect)
+      ) {
+        current = { rect, detailsRect };
+        setState({ target, rect, detailsRect });
       }
       frame = requestAnimationFrame(update);
     };
@@ -79,7 +113,26 @@ function useTargetRect(target: string | undefined) {
     return () => cancelAnimationFrame(frame);
   }, [target]);
 
-  return target ? rect : null;
+  return state && state.target === target
+    ? { rect: state.rect, detailsRect: state.detailsRect }
+    : { rect: null, detailsRect: null };
+}
+
+/** そのステップのあいだだけ、対象の星の日記の詳細を開いておく */
+function useOpenDetails(target: string | undefined, enabled: boolean) {
+  useEffect(() => {
+    if (!target || !enabled) return;
+    const el = findTarget(target);
+    const details = detailsOf(el);
+    if (!el || !details) return;
+
+    // 星をタップしたときと同じ開き方にして、詳細を星の上に並べる
+    if (!isPopoverOpen(details)) el.click();
+
+    return () => {
+      if (isPopoverOpen(details)) details.hidePopover();
+    };
+  }, [target, enabled]);
 }
 
 /** 画面全体に重ねる星空の軸 */
@@ -97,8 +150,8 @@ function Axes() {
   );
 }
 
-/** 対象の要素のまわりだけを丸く切り抜いて照らす */
-function Spotlight({ rect }: { rect: Rect }) {
+/** 対象の要素のまわりだけを丸く切り抜いて照らす。照らした部分は押せる */
+function Spotlight({ rect, onClick }: { rect: Rect; onClick: () => void }) {
   const diameter = spotlightDiameter(rect);
   const style: CSSProperties = {
     top: rect.top + rect.height / 2 - diameter / 2,
@@ -109,8 +162,10 @@ function Spotlight({ rect }: { rect: Rect }) {
 
   return (
     <div
-      className="pointer-events-none fixed rounded-full shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] transition-all duration-300"
+      className="fixed cursor-pointer rounded-full shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] transition-all duration-300"
       style={style}
+      onClick={onClick}
+      data-testid="tutorial-spotlight"
       aria-hidden="true"
     >
       <div className="absolute inset-0 rounded-full border-2 border-indigo-300/80" />
@@ -123,10 +178,14 @@ function Spotlight({ rect }: { rect: Rect }) {
 const BOTTOM_OFFSET = 104;
 
 /**
- * カードの位置。対象があればその近くに出す。
+ * カードの位置。対象があればその近くに、日記の詳細も開いていればそれにもかぶらないように出す。
  * 軸を見せるときは、真ん中の軸にかぶらないように画面の下に出す。
  */
-const cardPosition = (rect: Rect | null, showAxes: boolean): CSSProperties => {
+const cardPosition = (
+  rect: Rect | null,
+  detailsRect: Rect | null,
+  showAxes: boolean,
+): CSSProperties => {
   if (!rect) {
     return showAxes
       ? { left: "50%", bottom: BOTTOM_OFFSET, transform: "translateX(-50%)" }
@@ -141,17 +200,22 @@ const cardPosition = (rect: Rect | null, showAxes: boolean): CSSProperties => {
   const left = Math.min(Math.max(centerX - width / 2, MARGIN), vw - width - MARGIN);
   const radius = spotlightDiameter(rect) / 2;
 
+  // 照らしている範囲（＋ 開いている日記の詳細）の上端と下端
+  const top = Math.min(centerY - radius, detailsRect?.top ?? Infinity);
+  const bottom = Math.max(centerY + radius, detailsRect ? detailsRect.top + detailsRect.height : -Infinity);
+
   // 対象が画面の下半分にあればカードを上に、上半分にあれば下に出す
-  return centerY > vh / 2
-    ? { left, bottom: vh - centerY + radius + GAP }
-    : { left, top: centerY + radius + GAP };
+  return (top + bottom) / 2 > vh / 2
+    ? { left, bottom: vh - top + GAP }
+    : { left, top: bottom + GAP };
 };
 
 export default function Tutorial({ onClose, onStartWriting }: Props) {
   const [step, setStep] = useState(0);
   const current = STEPS[step];
   const isLast = step === STEPS.length - 1;
-  const rect = useTargetRect(current.target);
+  const { rect, detailsRect } = useTargetRect(current.target);
+  useOpenDetails(current.target, !!current.openDetails);
   const primaryRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -161,6 +225,14 @@ export default function Tutorial({ onClose, onStartWriting }: Props) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
+
+  // 照らした要素が押されたら、チュートリアルを閉じて本物の要素を押す
+  // （星なら日記の詳細が、＋ ボタンなら入力欄が開く）
+  const clickTarget = () => {
+    const el = document.querySelector<HTMLElement>(`[data-tour="${current.target}"]`);
+    onClose();
+    el?.click();
+  };
 
   // ページが変わったら、次に押すボタンにフォーカスを移す
   useEffect(() => {
@@ -175,7 +247,7 @@ export default function Tutorial({ onClose, onStartWriting }: Props) {
         onClick={onClose}
       />
       {current.showAxes && <Axes />}
-      {rect && <Spotlight rect={rect} />}
+      {rect && <Spotlight rect={rect} onClick={clickTarget} />}
 
       <div
         role="dialog"
@@ -184,7 +256,7 @@ export default function Tutorial({ onClose, onStartWriting }: Props) {
         className="fixed rounded-2xl border border-gray-800 bg-gradient-to-b from-gray-900 to-black p-5 shadow-2xl"
         style={{
           width: `min(${CARD_MAX_WIDTH}px, calc(100vw - ${MARGIN * 2}px))`,
-          ...cardPosition(rect, !!current.showAxes),
+          ...cardPosition(rect, detailsRect, !!current.showAxes),
         }}
       >
         <div className="mb-3 flex items-start justify-between gap-3">
