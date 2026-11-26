@@ -8,7 +8,9 @@ export async function analyzeEmotion(content: string) {
   try {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const response = await openai.responses.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-6-luna",
+      // 感情を数値にするだけなので推論はしない（速く・安くする）
+      reasoning: { effort: "none" },
       input: `
 以下の文章の感情を分析して、ポジティブ度・エネルギー・感情の強さの3つを0〜100の数字で表してください。
 文章:
