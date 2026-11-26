@@ -35,11 +35,11 @@ describe("チュートリアル", () => {
     expect(dialog()).toBeNull();
   });
 
-  it("次へ・戻るでページを移動し、最後に「はじめる」で閉じる", async () => {
+  it("次へ・戻るでページを移動し、最後に「書いてみる」で日記の入力画面を開く", async () => {
     await renderApp();
 
     fireEvent.click(screen.getByRole("button", { name: "次へ" }));
-    expect(screen.getByRole("dialog", { name: "星空の見方" })).toBeTruthy();
+    expect(screen.getByRole("dialog", { name: "画面全体が気持ちの地図" })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "戻る" }));
     expect(screen.getByRole("dialog", { name: "Stellar Diary へようこそ" })).toBeTruthy();
@@ -47,9 +47,12 @@ describe("チュートリアル", () => {
     fireEvent.click(screen.getByRole("button", { name: "次へ" }));
     fireEvent.click(screen.getByRole("button", { name: "次へ" }));
     fireEvent.click(screen.getByRole("button", { name: "次へ" }));
-    fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+    expect(screen.getByRole("dialog", { name: "日記を書いてみよう" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "書いてみる" }));
 
     expect(dialog()).toBeNull();
+    expect(screen.getByPlaceholderText("どんな1日だった？")).toBeTruthy();
     expect(localStorage.getItem(TUTORIAL_KEY)).not.toBeNull();
   });
 

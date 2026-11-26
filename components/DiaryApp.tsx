@@ -25,6 +25,7 @@ export default function DiaryApp() {
     tutorialStore.getServerSnapshot,
   );
   const [isTutorialReopened, setIsTutorialReopened] = useState(false);
+  const [isInputOpen, setIsInputOpen] = useState(false);
 
   useEffect(() => {
     seedSamplesIfFirstVisit();
@@ -46,10 +47,19 @@ export default function DiaryApp() {
     setIsTutorialReopened(false);
   };
 
+  const startWriting = () => {
+    closeTutorial();
+    setIsInputOpen(true);
+  };
+
   return (
     <>
       <StarMap diaries={recentDiaries} now={now} />
-      <InputModal onCreated={handleCreated} />
+      <InputModal
+        isOpen={isInputOpen}
+        onOpenChange={setIsInputOpen}
+        onCreated={handleCreated}
+      />
 
       <button
         onClick={() => setIsTutorialReopened(true)}
@@ -58,7 +68,9 @@ export default function DiaryApp() {
       >
         <RiQuestionLine size={22} />
       </button>
-      {(!hasSeenTutorial || isTutorialReopened) && <Tutorial onClose={closeTutorial} />}
+      {(!hasSeenTutorial || isTutorialReopened) && (
+        <Tutorial onClose={closeTutorial} onStartWriting={startWriting} />
+      )}
     </>
   );
 }

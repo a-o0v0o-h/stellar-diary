@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { RiAddLine, RiCloseLine } from "react-icons/ri";
 import { useForm, useWatch } from "react-hook-form";
 import axios from "axios";
@@ -14,6 +13,8 @@ type FormData = {
 };
 
 type Props = {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
   onCreated: (diary: Diary) => void;
 };
 
@@ -23,9 +24,7 @@ const ERROR_MESSAGES = {
   unavailable: "いまは星をつくれません。時間をおいて試してください。",
 } as const;
 
-export default function InputModal({ onCreated }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
-
+export default function InputModal({ isOpen, onOpenChange, onCreated }: Props) {
   const {
     register,
     handleSubmit,
@@ -62,7 +61,7 @@ export default function InputModal({ onCreated }: Props) {
       });
 
       reset();
-      setIsOpen(false);
+      onOpenChange(false);
       toast.success("星が生まれました");
     } catch (e) {
       console.error(e);
@@ -75,7 +74,9 @@ export default function InputModal({ onCreated }: Props) {
       {/* TODO: スタイルを整える */}
       {/* ＋ボタン */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => onOpenChange(true)}
+        data-tour="add-button"
+        aria-label="日記を書く"
         className="fixed bottom-6 right-6 w-14 h-14 rounded-full
         bg-indigo-500 hover:bg-indigo-400
         text-white shadow-lg
@@ -89,7 +90,7 @@ export default function InputModal({ onCreated }: Props) {
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50"
-          onClick={() => setIsOpen(false)}
+          onClick={() => onOpenChange(false)}
         >
           <div
             className="w-full max-w-md mx-4 p-6 rounded-2xl
@@ -102,7 +103,7 @@ export default function InputModal({ onCreated }: Props) {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-white text-lg">今日のひとこと</h2>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => onOpenChange(false)}
                 className="text-gray-400 hover:text-gray-300 cursor-pointer"
               >
                 <RiCloseLine size={22} />
