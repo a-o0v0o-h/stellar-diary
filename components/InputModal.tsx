@@ -2,33 +2,67 @@
 
 import { useState } from "react";
 import { RiAddLine, RiCloseLine } from "react-icons/ri";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import type { AnalyzeResponse } from "@/app/api/analyze/route";
+import { MAX_CONTENT_LENGTH } from "@/lib/constants";
+import type { Diary } from "@/lib/diaryStore";
 
 type FormData = {
   content: string;
 };
 
-export default function InputModal() {
-  const router = useRouter();
+type Props = {
+  onCreated: (diary: Diary) => void;
+};
+
+const ERROR_MESSAGES = {
+  invalid: `${MAX_CONTENT_LENGTH}文字以内で入力してください。`,
+  rate_limited: "今日つくれる星はここまでです。また明日書いてみてください。",
+  unavailable: "いまは星をつくれません。時間をおいて試してください。",
+} as const;
+
+export default function InputModal({ onCreated }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { isSubmitting },
   } = useForm<FormData>();
 
+  const length = useWatch({ control, name: "content" })?.length ?? 0;
+
   const onSubmit = async (data: FormData) => {
+    const content = data.content.trim();
+
     try {
-      await axios.post("/api/diaries", data);
+      const res = await axios.post<AnalyzeResponse>(
+        "/api/analyze",
+        { content },
+        { validateStatus: () => true },
+      );
+
+      if (!res.data?.isOk) {
+        const reason = res.data?.reason ?? "unavailable";
+        toast.error(ERROR_MESSAGES[reason]);
+        return;
+      }
+
+      onCreated({
+        id: crypto.randomUUID(),
+        content,
+        emotion: res.data.emotion,
+        energy: res.data.energy,
+        intensity: res.data.intensity,
+        createdAt: new Date().toISOString(),
+      });
 
       reset();
       setIsOpen(false);
-      router.refresh();
       toast.success("星が生まれました");
     } catch (e) {
       console.error(e);
@@ -58,8 +92,8 @@ export default function InputModal() {
           onClick={() => setIsOpen(false)}
         >
           <div
-            className="w-full max-w-md mx-4 p-6 rounded-2xl 
-            bg-gradient-to-b from-gray-900 to-black 
+            className="w-full max-w-md mx-4 p-6 rounded-2xl
+            bg-gradient-to-b from-gray-900 to-black
             shadow-2xl border border-gray-800"
             onClick={(e) => {
               e.stopPropagation();
@@ -77,7 +111,12 @@ export default function InputModal() {
 
             <form onSubmit={handleSubmit(onSubmit)}>
               <textarea
-                {...register("content", { required: true })}
+                {...register("content", {
+                  required: true,
+                  maxLength: MAX_CONTENT_LENGTH,
+                  validate: (value) => value.trim().length > 0,
+                })}
+                maxLength={MAX_CONTENT_LENGTH}
                 placeholder="どんな1日だった？"
                 className="w-full h-32 p-4 rounded-lg
                 bg-black text-white placeholder-gray-500
@@ -85,11 +124,14 @@ export default function InputModal() {
                 focus:outline-none focus:ring-2 focus:ring-indigo-500
                 resize-none"
               />
+              <p className="mt-1 text-right text-xs text-gray-500">
+                {length} / {MAX_CONTENT_LENGTH}
+              </p>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-5 w-full py-2 rounded-full
+                className="mt-4 w-full py-2 rounded-full
                 bg-indigo-500 hover:bg-indigo-400
                 disabled:opacity-50
                 text-white font-medium
@@ -98,6 +140,11 @@ export default function InputModal() {
                 {isSubmitting ? "星を作っています..." : "星をつくる"}
               </button>
             </form>
+
+            <p className="mt-4 text-xs text-gray-500 leading-relaxed">
+              書いた内容はこのブラウザの中だけに保存されます。感情の解析のため、文章は
+              OpenAI API に送信されます。
+            </p>
           </div>
         </div>
       )}

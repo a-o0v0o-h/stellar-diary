@@ -11,7 +11,8 @@ type Props = {
   emotion: number;
   energy: number;
   intensity: number;
-  createdAt: Date;
+  createdAt: string;
+  isSample?: boolean;
 };
 
 type StatProps = {
@@ -41,6 +42,7 @@ export default function DiaryDetails({
   energy,
   intensity,
   createdAt,
+  isSample,
 }: Props) {
   const date = dayjs(createdAt).format("YYYY/MM/DD HH:mm:ss");
 
@@ -74,7 +76,10 @@ export default function DiaryDetails({
             label="感情の強さ"
           />
         </div>
-        <span>{date}</span>
+        <span>
+          {date}
+          {isSample && <span className="ml-2 text-white/40">サンプル</span>}
+        </span>
       </div>
     </div>
   );
