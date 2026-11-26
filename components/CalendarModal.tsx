@@ -10,7 +10,7 @@ import { MAX_REFLECTION_DIARIES, MIN_REFLECTION_DIARIES } from "@/lib/constants"
 import type { Diary } from "@/lib/diaryStore";
 import * as reflectionStore from "@/lib/reflectionStore";
 import { starSize } from "@/lib/star";
-import { dayKey, startOfWeek, weekKey } from "@/lib/week";
+import { dayKey, monthKey, startOfWeek } from "@/lib/date";
 
 type Props = {
   onClose: () => void;
@@ -21,7 +21,7 @@ const WEEKDAYS = ["月", "火", "水", "木", "金", "土", "日"];
 const WEEKDAY_OF = ["日", "月", "火", "水", "木", "金", "土"];
 
 const ERROR_MESSAGES = {
-  invalid: "この週の日記を読み込めませんでした。",
+  invalid: "この月の日記を読み込めませんでした。",
   rate_limited: "今日のふりかえりはここまでです。また明日試してください。",
   unavailable: "いまはふりかえりを作れません。時間をおいて試してください。",
 } as const;
@@ -79,7 +79,7 @@ function DayDiaries({ date, diaries }: { date: Dayjs; diaries: Diary[] }) {
   );
 }
 
-function WeekReflection({ weekStart, diaries }: { weekStart: Dayjs; diaries: Diary[] }) {
+function MonthReflection({ month, diaries }: { month: Dayjs; diaries: Diary[] }) {
   const reflections = useSyncExternalStore(
     reflectionStore.subscribe,
     reflectionStore.getSnapshot,
@@ -87,14 +87,13 @@ function WeekReflection({ weekStart, diaries }: { weekStart: Dayjs; diaries: Dia
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  const key = weekKey(weekStart);
+  const key = monthKey(month);
   const saved = reflections[key];
   // サンプルの日記はふりかえりに使わない
   const ownDiaries = diaries.filter((diary) => !diary.isSample);
   const ownIds = ownDiaries.map((diary) => diary.id);
   const canReflect = ownDiaries.length >= MIN_REFLECTION_DIARIES;
   const isOutdated = !!saved && !sameIds(saved.diaryIds, ownIds);
-  const weekEnd = weekStart.add(6, "day");
 
   const reflect = async () => {
     setIsLoading(true);
@@ -143,7 +142,7 @@ function WeekReflection({ weekStart, diaries }: { weekStart: Dayjs; diaries: Dia
         {isLoading ? "星をたどっています..." : label}
       </button>
       <p className="mt-2 text-xs leading-relaxed text-gray-500">
-        ふりかえりのため、この週の日記は OpenAI API に送信されます。
+        ふりかえりのため、この月の日記は OpenAI API に送信されます。
       </p>
     </>
   );
@@ -151,7 +150,7 @@ function WeekReflection({ weekStart, diaries }: { weekStart: Dayjs; diaries: Dia
   return (
     <section className="mt-6 border-t border-gray-800 pt-5">
       <h3 className="text-sm text-white">
-        {weekStart.month() + 1}/{weekStart.date()}〜{weekEnd.month() + 1}/{weekEnd.date()} のふりかえり
+        {month.month() + 1}月のふりかえり
       </h3>
 
       {saved ? (
@@ -176,10 +175,10 @@ function WeekReflection({ weekStart, diaries }: { weekStart: Dayjs; diaries: Dia
           {isOutdated && canReflect && button("書き足した日記でふりかえり直す")}
         </div>
       ) : canReflect ? (
-        button("この週をふりかえる")
+        button("この月をふりかえる")
       ) : (
         <p className="mt-2 text-xs leading-relaxed text-gray-500">
-          あと {MIN_REFLECTION_DIARIES - ownDiaries.length} 件書くと、この週をふりかえれます。
+          あと {MIN_REFLECTION_DIARIES - ownDiaries.length} 件書くと、この月をふりかえれます。
           {ownDiaries.length < diaries.length && "（サンプルの日記は含まれません）"}
         </p>
       )}
@@ -212,9 +211,8 @@ export default function CalendarModal({ onClose, diaries }: Props) {
   }, [diaries]);
 
   const days = monthGrid(month);
-  const weekStart = startOfWeek(selected);
-  const weekDiaries = Array.from({ length: 7 }, (_, i) =>
-    byDay.get(dayKey(weekStart.add(i, "day"))) ?? [],
+  const monthDiaries = Array.from({ length: month.daysInMonth() }, (_, i) =>
+    byDay.get(dayKey(month.add(i, "day"))) ?? [],
   ).flat();
   const isCurrentMonth = month.isSame(today, "month");
 
@@ -226,34 +224,21 @@ export default function CalendarModal({ onClose, diaries }: Props) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby="calendar-title"
+        aria-label="カレンダー"
         className="mx-4 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-gray-800 bg-gradient-to-b from-gray-900 to-black p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 id="calendar-title" className="text-lg text-white">
-            カレンダー
+        <div className="mb-4 flex items-center">
+          <h2 className="text-lg text-white" aria-live="polite">
+            {month.year()}年{month.month() + 1}月
           </h2>
-          <button
-            onClick={onClose}
-            aria-label="閉じる"
-            className="cursor-pointer text-gray-400 hover:text-gray-300"
-          >
-            <RiCloseLine size={22} />
-          </button>
-        </div>
-
-        <div className="mb-3 flex items-center justify-between">
           <button
             onClick={() => setMonth(month.subtract(1, "month"))}
             aria-label="前の月"
-            className="cursor-pointer rounded-full p-1 text-gray-400 hover:text-gray-200"
+            className="ml-3 cursor-pointer rounded-full p-1 text-gray-400 hover:text-gray-200"
           >
             <RiArrowLeftSLine size={20} />
           </button>
-          <p className="text-sm text-gray-200" aria-live="polite">
-            {month.year()}年{month.month() + 1}月
-          </p>
           <button
             onClick={() => setMonth(month.add(1, "month"))}
             disabled={isCurrentMonth}
@@ -261,6 +246,13 @@ export default function CalendarModal({ onClose, diaries }: Props) {
             className="cursor-pointer rounded-full p-1 text-gray-400 hover:text-gray-200 disabled:cursor-default disabled:opacity-30"
           >
             <RiArrowRightSLine size={20} />
+          </button>
+          <button
+            onClick={onClose}
+            aria-label="閉じる"
+            className="ml-auto cursor-pointer text-gray-400 hover:text-gray-300"
+          >
+            <RiCloseLine size={22} />
           </button>
         </div>
 
@@ -305,9 +297,7 @@ export default function CalendarModal({ onClose, diaries }: Props) {
         </div>
 
         <DayDiaries date={selected} diaries={byDay.get(dayKey(selected)) ?? []} />
-        {!weekStart.isAfter(today) && (
-          <WeekReflection key={weekKey(weekStart)} weekStart={weekStart} diaries={weekDiaries} />
-        )}
+        <MonthReflection key={monthKey(month)} month={month} diaries={monthDiaries} />
       </div>
     </div>
   );

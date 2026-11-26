@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MAX_REFLECTION_DIARIES } from "@/lib/constants";
 
 const generateReflection = vi.fn();
 
@@ -34,7 +35,7 @@ describe("POST /api/reflect", () => {
     generateReflection.mockReset();
     generateReflection.mockResolvedValue({
       isOk: true,
-      comment: "やわらかな光の週でした。",
+      comment: "やわらかな光のひと月でした。",
       quote: {
         id: "q001",
         text: "けれどもほんとうのさいわいは一体何だろう",
@@ -54,7 +55,7 @@ describe("POST /api/reflect", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({
       isOk: true,
-      comment: "やわらかな光の週でした。",
+      comment: "やわらかな光のひと月でした。",
       quote: {
         text: "けれどもほんとうのさいわいは一体何だろう",
         author: "宮沢賢治",
@@ -67,7 +68,7 @@ describe("POST /api/reflect", () => {
 
   it.each([
     ["日記が 2 件", { diaries: diaries(2) }],
-    ["日記が 31 件", { diaries: diaries(31) }],
+    ["日記が多すぎる", { diaries: diaries(MAX_REFLECTION_DIARIES + 1) }],
     ["配列でない", { diaries: "x" }],
     ["空の本文", { diaries: [diary({ content: "  " }), diary(), diary()] }],
     ["281 文字の本文", { diaries: [diary({ content: "あ".repeat(281) }), diary(), diary()] }],
@@ -85,11 +86,11 @@ describe("POST /api/reflect", () => {
     expect(generateReflection).not.toHaveBeenCalled();
   });
 
-  it("3 件と 30 件は受け付ける", async () => {
+  it("3 件と最大件数は受け付ける", async () => {
     const { POST } = await loadRoute();
 
     expect((await POST(request({ diaries: diaries(3) }))).status).toBe(200);
-    expect((await POST(request({ diaries: diaries(30) }))).status).toBe(200);
+    expect((await POST(request({ diaries: diaries(MAX_REFLECTION_DIARIES) }))).status).toBe(200);
   });
 
   it("同じ IP から 6 回目は 429 を返し、AI を呼ばない", async () => {

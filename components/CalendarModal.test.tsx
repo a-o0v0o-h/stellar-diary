@@ -29,7 +29,7 @@ const renderCalendar = async (diaries: Diary[], onClose = vi.fn()) => {
 const okResponse = {
   data: {
     isOk: true,
-    comment: "やわらかな光の週でした。",
+    comment: "やわらかな光のひと月でした。",
     quote: {
       text: "雨が　すきか\nわたしはすきだ",
       author: "八木重吉",
@@ -39,8 +39,8 @@ const okResponse = {
   },
 };
 
-// 2026-11-26（木）。この週は 11/23（月）〜 11/29（日）
-const THIS_WEEK = [
+// 今日は 2026-11-26（木）
+const THIS_MONTH = [
   diary("a", "2026-11-23T09:00:00"),
   diary("b", "2026-11-24T21:00:00"),
   diary("c", "2026-11-26T08:00:00"),
@@ -61,7 +61,7 @@ describe("カレンダー", () => {
   });
 
   it("今月を表示し、今日の日記を見せる", async () => {
-    await renderCalendar(THIS_WEEK);
+    await renderCalendar(THIS_MONTH);
 
     expect(screen.getByText("2026年11月")).toBeTruthy();
     expect(screen.getByRole("button", { name: "11月26日（日記 1 件）" }).getAttribute("aria-pressed")).toBe("true");
@@ -69,7 +69,7 @@ describe("カレンダー", () => {
   });
 
   it("日付を押すと、その日の日記を見せる", async () => {
-    await renderCalendar(THIS_WEEK);
+    await renderCalendar(THIS_MONTH);
 
     fireEvent.click(screen.getByRole("button", { name: "11月24日（日記 1 件）" }));
 
@@ -88,24 +88,24 @@ describe("カレンダー", () => {
     expect(screen.getByText("日記 old")).toBeTruthy();
   });
 
-  it("日記が 3 件に満たない週は、あと何件で ふりかえれるかを案内する（サンプルは数えない）", async () => {
+  it("日記が 3 件に満たない月は、あと何件で ふりかえれるかを案内する（サンプルは数えない）", async () => {
     await renderCalendar([
       diary("a", "2026-11-23T09:00:00"),
       diary("s", "2026-11-24T09:00:00", { isSample: true }),
     ]);
 
-    expect(screen.getByText(/あと 2 件書くと、この週をふりかえれます。/)).toBeTruthy();
+    expect(screen.getByText(/あと 2 件書くと、この月をふりかえれます。/)).toBeTruthy();
     expect(screen.getByText(/サンプルの日記は含まれません/)).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "この週をふりかえる" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "この月をふりかえる" })).toBeNull();
   });
 
-  it("ふりかえると、その週の日記を送ってコメントと名言を見せ、次からも残っている", async () => {
+  it("ふりかえると、表示している月の日記を送ってコメントと名言を見せ、次からも残っている", async () => {
     post.mockResolvedValue(okResponse);
-    await renderCalendar([...THIS_WEEK, diary("last-week", "2026-11-22T09:00:00")]);
+    await renderCalendar([...THIS_MONTH, diary("last-month", "2026-10-31T09:00:00")]);
 
-    fireEvent.click(screen.getByRole("button", { name: "この週をふりかえる" }));
+    fireEvent.click(screen.getByRole("button", { name: "この月をふりかえる" }));
 
-    expect(await screen.findByText("やわらかな光の週でした。")).toBeTruthy();
+    expect(await screen.findByText("やわらかな光のひと月でした。")).toBeTruthy();
     expect(screen.getByText(/わたしはすきだ/)).toBeTruthy();
     expect(screen.getByText(/八木重吉『貧しき信徒』/)).toBeTruthy();
 
@@ -118,38 +118,38 @@ describe("カレンダー", () => {
     ]);
 
     cleanup();
-    await renderCalendar([...THIS_WEEK, diary("last-week", "2026-11-22T09:00:00")]);
-    expect(screen.getByText("やわらかな光の週でした。")).toBeTruthy();
+    await renderCalendar([...THIS_MONTH, diary("last-month", "2026-10-31T09:00:00")]);
+    expect(screen.getByText("やわらかな光のひと月でした。")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /ふりかえ/ })).toBeNull();
   });
 
   it("ふりかえったあとに日記を書き足すと、作り直せる", async () => {
     post.mockResolvedValue(okResponse);
-    await renderCalendar(THIS_WEEK);
-    fireEvent.click(screen.getByRole("button", { name: "この週をふりかえる" }));
-    await screen.findByText("やわらかな光の週でした。");
+    await renderCalendar(THIS_MONTH);
+    fireEvent.click(screen.getByRole("button", { name: "この月をふりかえる" }));
+    await screen.findByText("やわらかな光のひと月でした。");
 
     cleanup();
-    await renderCalendar([...THIS_WEEK, diary("d", "2026-11-26T20:00:00")]);
+    await renderCalendar([...THIS_MONTH, diary("d", "2026-11-26T20:00:00")]);
 
     expect(screen.getByRole("button", { name: "書き足した日記でふりかえり直す" })).toBeTruthy();
   });
 
   it("失敗したら理由を知らせる", async () => {
     post.mockResolvedValue({ data: { isOk: false, reason: "rate_limited" } });
-    await renderCalendar(THIS_WEEK);
+    await renderCalendar(THIS_MONTH);
 
-    fireEvent.click(screen.getByRole("button", { name: "この週をふりかえる" }));
+    fireEvent.click(screen.getByRole("button", { name: "この月をふりかえる" }));
 
     await waitFor(() =>
       expect(toastError).toHaveBeenCalledWith("今日のふりかえりはここまでです。また明日試してください。"),
     );
-    expect(screen.getByRole("button", { name: "この週をふりかえる" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "この月をふりかえる" })).toBeTruthy();
   });
 
   it("Esc キーで閉じる", async () => {
     const onClose = vi.fn();
-    await renderCalendar(THIS_WEEK, onClose);
+    await renderCalendar(THIS_MONTH, onClose);
 
     fireEvent.keyDown(window, { key: "Escape" });
 

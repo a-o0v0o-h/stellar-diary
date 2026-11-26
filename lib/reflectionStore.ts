@@ -9,7 +9,7 @@ export type Reflection = {
   createdAt: string;
 };
 
-/** 週のキー（その週の月曜日の日付）ごとのふりかえり */
+/** 月のキー（YYYY-MM）ごとのふりかえり */
 export type Reflections = Record<string, Reflection>;
 
 const STORAGE_KEY = "stellar-diary:reflections";

@@ -31,7 +31,7 @@ describe("moodOf", () => {
     ["ポジティブでのんびり", [diary(80, 20), diary(60, 40)], "calm"],
     ["ネガティブで元気", [diary(20, 80), diary(30, 60)], "restless"],
     ["ネガティブでのんびり", [diary(20, 20), diary(40, 30)], "tired"],
-  ])("%s の週は %s", (_, diaries, mood) => {
+  ])("%s の月は %s", (_, diaries, mood) => {
     expect(moodOf(diaries)).toBe(mood);
   });
 });
@@ -63,7 +63,7 @@ describe("generateReflection", () => {
   it("コメントと、候補から選ばれた名言を返す", async () => {
     create.mockImplementation(async (params) => ({
       output_text: JSON.stringify({
-        comment: "  にぎやかな星が並んだ週でした。  ",
+        comment: "  にぎやかな星が並んだひと月でした。  ",
         quoteId: params.text.format.schema.properties.quoteId.enum[0],
       }),
     }));
@@ -72,11 +72,11 @@ describe("generateReflection", () => {
 
     expect(result.isOk).toBe(true);
     if (!result.isOk) return;
-    expect(result.comment).toBe("にぎやかな星が並んだ週でした。");
+    expect(result.comment).toBe("にぎやかな星が並んだひと月でした。");
     expect(result.quote.id).toBe(candidateIds()[0]);
   });
 
-  it("日記の本文と、週の気持ちに合う候補だけを AI に渡す", async () => {
+  it("日記の本文と、その月の気持ちに合う候補だけを AI に渡す", async () => {
     create.mockResolvedValue({ output_text: "{}" });
 
     await generateReflection(diaries);
@@ -90,9 +90,9 @@ describe("generateReflection", () => {
   });
 
   it.each([
-    ["候補にない id", () => ({ comment: "よい週でした", quoteId: "q999" })],
+    ["候補にない id", () => ({ comment: "よいひと月でした", quoteId: "q999" })],
     ["空のコメント", (ids: string[]) => ({ comment: "  ", quoteId: ids[0] })],
-    ["形が違う", () => ["よい週でした"]],
+    ["形が違う", () => ["よいひと月でした"]],
   ])("%s が返ってきたら失敗にする", async (_, output) => {
     create.mockImplementation(async (params) => ({
       output_text: JSON.stringify(output(params.text.format.schema.properties.quoteId.enum)),
