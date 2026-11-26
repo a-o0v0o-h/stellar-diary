@@ -15,6 +15,8 @@ permissions:
 jobs:
   analyze:
     name: Analyze
+    # 非公開リポジトリでは Code scanning が使えないため、公開後に動かす
+    if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
