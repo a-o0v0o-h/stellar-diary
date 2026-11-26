@@ -47,6 +47,8 @@ describe("チュートリアル", () => {
     fireEvent.click(screen.getByRole("button", { name: "次へ" }));
     fireEvent.click(screen.getByRole("button", { name: "次へ" }));
     fireEvent.click(screen.getByRole("button", { name: "次へ" }));
+    expect(screen.getByRole("dialog", { name: "カレンダーでふりかえる" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "次へ" }));
     expect(screen.getByRole("dialog", { name: "日記を書いてみよう" })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "書いてみる" }));
@@ -56,10 +58,22 @@ describe("チュートリアル", () => {
     expect(localStorage.getItem(TUTORIAL_KEY)).not.toBeNull();
   });
 
-  it("照らした ＋ ボタンを押すと、チュートリアルを閉じて入力画面を開く", async () => {
+  it("照らしたカレンダーのボタンを押すと、チュートリアルを閉じてカレンダーを開く", async () => {
     await renderApp();
 
     for (let i = 0; i < 3; i++) {
+      fireEvent.click(screen.getByRole("button", { name: "次へ" }));
+    }
+    fireEvent.click(await screen.findByTestId("tutorial-spotlight"));
+
+    expect(screen.queryByRole("dialog", { name: "カレンダーでふりかえる" })).toBeNull();
+    expect(screen.getByRole("dialog", { name: "カレンダー" })).toBeTruthy();
+  });
+
+  it("照らした ＋ ボタンを押すと、チュートリアルを閉じて入力画面を開く", async () => {
+    await renderApp();
+
+    for (let i = 0; i < 4; i++) {
       fireEvent.click(screen.getByRole("button", { name: "次へ" }));
     }
     fireEvent.click(await screen.findByTestId("tutorial-spotlight"));
