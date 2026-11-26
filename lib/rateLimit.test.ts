@@ -15,21 +15,22 @@ describe("consumeRateLimit", () => {
     vi.useRealTimers();
   });
 
-  it("デフォルトでは 1 日 10 回まで許可する", async () => {
+  it("デフォルトでは 1 日 3 回まで許可する", async () => {
     const { consumeRateLimit } = await loadRateLimit();
 
-    const results = Array.from({ length: 11 }, () => consumeRateLimit("1.1.1.1"));
+    const results = Array.from({ length: 4 }, () => consumeRateLimit("1.1.1.1"));
 
-    expect(results.slice(0, 10).every(Boolean)).toBe(true);
-    expect(results[10]).toBe(false);
+    expect(results.slice(0, 3).every(Boolean)).toBe(true);
+    expect(results[3]).toBe(false);
   });
 
   it("DAILY_ANALYZE_LIMIT で回数を変更できる", async () => {
-    const { consumeRateLimit } = await loadRateLimit("2");
+    const { consumeRateLimit } = await loadRateLimit("5");
 
-    expect(consumeRateLimit("1.1.1.1")).toBe(true);
-    expect(consumeRateLimit("1.1.1.1")).toBe(true);
-    expect(consumeRateLimit("1.1.1.1")).toBe(false);
+    const results = Array.from({ length: 6 }, () => consumeRateLimit("1.1.1.1"));
+
+    expect(results.slice(0, 5).every(Boolean)).toBe(true);
+    expect(results[5]).toBe(false);
   });
 
   it("IP ごとに別々に数える", async () => {

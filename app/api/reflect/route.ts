@@ -19,7 +19,7 @@ export type ReflectResponse =
   | { isOk: false; reason: "invalid" | "rate_limited" | "unavailable" };
 
 /** 星をつくる回数とは別に数える */
-const consumeReflectLimit = createRateLimit(Number(process.env.DAILY_REFLECT_LIMIT ?? 5));
+const consumeReflectLimit = createRateLimit(Number(process.env.DAILY_REFLECT_LIMIT ?? 3));
 
 const isScore = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;

@@ -71,7 +71,7 @@ describe("POST /api/reflect", () => {
     ["日記が多すぎる", { diaries: diaries(MAX_REFLECTION_DIARIES + 1) }],
     ["配列でない", { diaries: "x" }],
     ["空の本文", { diaries: [diary({ content: "  " }), diary(), diary()] }],
-    ["281 文字の本文", { diaries: [diary({ content: "あ".repeat(281) }), diary(), diary()] }],
+    ["141 文字の本文", { diaries: [diary({ content: "あ".repeat(141) }), diary(), diary()] }],
     ["範囲外の数値", { diaries: [diary({ emotion: 101 }), diary(), diary()] }],
     ["数値でない", { diaries: [diary({ energy: "50" }), diary(), diary()] }],
     ["日付の形が違う", { diaries: [diary({ date: "11/25" }), diary(), diary()] }],
@@ -93,17 +93,17 @@ describe("POST /api/reflect", () => {
     expect((await POST(request({ diaries: diaries(MAX_REFLECTION_DIARIES) }))).status).toBe(200);
   });
 
-  it("同じ IP から 6 回目は 429 を返し、AI を呼ばない", async () => {
+  it("同じ IP から 4 回目は 429 を返し、AI を呼ばない", async () => {
     const { POST } = await loadRoute();
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
       expect((await POST(request({ diaries: diaries(3) }))).status).toBe(200);
     }
     const res = await POST(request({ diaries: diaries(3) }));
 
     expect(res.status).toBe(429);
     expect(await res.json()).toEqual({ isOk: false, reason: "rate_limited" });
-    expect(generateReflection).toHaveBeenCalledTimes(5);
+    expect(generateReflection).toHaveBeenCalledTimes(3);
   });
 
   it("生成に失敗したときは 503 を返す", async () => {

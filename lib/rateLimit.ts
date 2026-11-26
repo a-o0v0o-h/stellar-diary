@@ -27,4 +27,4 @@ export const createRateLimit = (limit: number) => {
 };
 
 /** 日記の解析（星をつくる）の回数制限 */
-export const consumeRateLimit = createRateLimit(Number(process.env.DAILY_ANALYZE_LIMIT ?? 10));
+export const consumeRateLimit = createRateLimit(Number(process.env.DAILY_ANALYZE_LIMIT ?? 3));

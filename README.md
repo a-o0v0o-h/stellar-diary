@@ -35,8 +35,9 @@ DB（Prisma + SQLite）に保存していた以前の版は [`prisma` ブラン�
 
 公開環境で OpenAI API を使うため、意図しない大量利用への対策を入れています。
 
-- 1 回の投稿は 280 文字まで（画面とサーバーの両方でチェック）
-- 解析は IP ごとに 1 日 10 回まで（`DAILY_ANALYZE_LIMIT` で変更可能）
+- 1 回の投稿は 140 文字まで（画面とサーバーの両方でチェック）
+- 解析は IP ごとに 1 日 3 回まで（`DAILY_ANALYZE_LIMIT` で変更可能）
+- ふりかえりは IP ごとに 1 日 3 回まで（`DAILY_REFLECT_LIMIT` で変更可能）
 - OpenAI 側はクレジットの前払い + 自動チャージなしで運用し、上限を超えて請求されないようにする
 
 ※ 回数制限はサーバーのメモリで数えているため、サーバーレス環境ではインスタンスごとのカウントになります。料金の上限は OpenAI 側の設定で担保しています。
@@ -70,8 +71,10 @@ npm install
 
 ```env
 OPENAI_API_KEY="your_openai_api_key"
-# 任意: IP ごとの 1 日あたりの解析回数（デフォルト 10）
-DAILY_ANALYZE_LIMIT=10
+# 任意: IP ごとの 1 日あたりの解析回数（デフォルト 3）
+DAILY_ANALYZE_LIMIT=3
+# 任意: IP ごとの 1 日あたりのふりかえり回数（デフォルト 3）
+DAILY_REFLECT_LIMIT=3
 ```
 
 ### 4. 開発サーバーを起動
@@ -95,7 +98,7 @@ npm run build      # 本番ビルド
 
 API キーがなくても動くように、OpenAI API はモックにしています。
 
-- `app/api/analyze/route.test.ts`：入力チェック（空文字・281 文字など）、回数制限、解析失敗時のレスポンス
+- `app/api/analyze/route.test.ts`：入力チェック（空文字・141 文字など）、回数制限、解析失敗時のレスポンス
 - `lib/analyzeEmotion.test.ts`：AI の返答が崩れていたとき（コードブロック付き・数値以外・JSON でない）の扱い
 - `lib/rateLimit.test.ts`：IP ごとのカウントと 24 時間でのリセット
 - `lib/diaryStore.test.ts`：localStorage の読み書き、壊れたデータ、書き込めない環境、サンプルの星
