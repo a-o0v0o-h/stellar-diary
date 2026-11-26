@@ -103,9 +103,22 @@ API キーがなくても動くように、OpenAI API はモックにしてい�
 - `lib/rateLimit.test.ts`：IP ごとのカウントと 24 時間でのリセット
 - `lib/diaryStore.test.ts`：localStorage の読み書き、壊れたデータ、書き込めない環境、サンプルの星
 
+### E2E テスト
+
+Playwright で、ブラウザから主要な流れを確かめます。OpenAI API はモックサーバー（`e2e/mock-openai.mjs`）に差し替えるので、API キーは不要です。
+
+```bash
+npx playwright install chromium  # 初回だけ
+npm run test:e2e
+```
+
+- 本番ビルドを 3100 番ポートで起動するので、開発サーバー（3000 番）と同時に動かせます
+- デスクトップとスマホ（Pixel 7）の画面サイズで実行します
+- `e2e/diary.spec.ts`：初回表示（チュートリアル・サンプルの星）、日記を書く、カレンダーと月のふりかえり
+
 ### CI・脆弱性チェック
 
-- **CI**（GitHub Actions）：PR と `main` への push で lint・型チェック・テスト・ビルドを実行
+- **CI**（GitHub Actions）：PR と `main` への push で lint・型チェック・テスト・ビルドを実行、E2E テスト
 - **npm audit**：本番で使うパッケージに high 以上の脆弱性があれば CI を失敗させる
 - **CodeQL**：コードの脆弱性を静的解析（PR・`main` への push・毎週月曜）
 - **Dependabot**：依存パッケージと GitHub Actions の更新 PR を毎週作成
