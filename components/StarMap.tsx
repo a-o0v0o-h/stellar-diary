@@ -92,6 +92,8 @@ export default function StarMap({ diaries, now }: Props) {
         >
           <button
             ref={star.id === newStarId ? newStarRef : undefined}
+            data-tour={star.id === mappedStars.at(-1)?.id ? "latest-star" : undefined}
+            aria-label={`${dayjs(star.createdAt).format("M月D日")}の日記`}
             className={`bg-white rounded-full cursor-pointer shadow-[0_0_6px_2px_rgba(255,255,255,0.6),0_0_12px_4px_rgba(200,220,255,0.3)] ${star.id === newStarId ? "star-appear" : ""}`}
             popoverTarget={`details-${star.id}`}
             style={{

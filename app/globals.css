@@ -46,3 +46,24 @@ body {
 .star-appear {
   animation: star-appear 0.8s ease-out forwards;
 }
+
+/* 初めてのチュートリアルを閉じたあと、? ボタンの場所を教える */
+@keyframes help-glow {
+  0%,
+  100% {
+    color: rgb(107 114 128);
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(129, 140, 248, 0);
+  }
+  50% {
+    color: rgb(224 231 255);
+    transform: scale(1.3);
+    box-shadow:
+      0 0 0 6px rgba(129, 140, 248, 0.35),
+      0 0 24px 10px rgba(129, 140, 248, 0.6);
+  }
+}
+
+.help-glow {
+  animation: help-glow 0.8s ease-in-out 3;
+}
