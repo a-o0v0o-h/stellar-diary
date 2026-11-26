@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "Stellar Diary",
   description:
     "つぶやきを星空で可視化する日記アプリ。新しい記録ほど明るく輝き、過去の出来事を直感的に振り返ることができます。",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
