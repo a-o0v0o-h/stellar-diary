@@ -17,12 +17,15 @@ type Step = {
   showAxes?: boolean;
   /** 対象の星の日記の詳細を開いて見せる */
   openDetails?: boolean;
+  /** 本文の下に小さく添える補足 */
+  note?: string;
 };
 
 const STEPS: Step[] = [
   {
     title: "Stellar Diary へようこそ",
     body: "ひとこと日記を書くと、AI が気持ちを読み取って、星空に星がひとつ生まれます。",
+    note: "あとで右上の ? からいつでも見直せます。",
   },
   {
     title: "画面全体が気持ちの地図",
@@ -273,6 +276,7 @@ export default function Tutorial({ onClose, onStartWriting }: Props) {
         </div>
 
         <p className="text-sm leading-relaxed text-gray-300">{current.body}</p>
+        {current.note && <p className="mt-2 text-xs text-gray-500">{current.note}</p>}
 
         <div className="mt-5 flex items-center justify-between gap-3">
           <span className="text-xs text-gray-500">

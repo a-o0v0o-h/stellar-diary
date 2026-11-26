@@ -84,6 +84,27 @@ describe("チュートリアル", () => {
     expect(dialog()).toBeNull();
   });
 
+  it("初めてのチュートリアルを閉じると、? ボタンが光って見直せる場所を教える", async () => {
+    await renderApp();
+    expect(screen.getByText("あとで右上の ? からいつでも見直せます。")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "スキップ" }));
+
+    const help = screen.getByRole("button", { name: "使い方を見る" });
+    expect(help.classList.contains("help-glow")).toBe(true);
+  });
+
+  it("? ボタンから見直して閉じたときは光らない", async () => {
+    localStorage.setItem(TUTORIAL_KEY, "1");
+    await renderApp();
+
+    const help = screen.getByRole("button", { name: "使い方を見る" });
+    fireEvent.click(help);
+    fireEvent.click(screen.getByRole("button", { name: "スキップ" }));
+
+    expect(help.classList.contains("help-glow")).toBe(false);
+  });
+
   it("? ボタンでもう一度見られる", async () => {
     localStorage.setItem(TUTORIAL_KEY, "1");
     await renderApp();

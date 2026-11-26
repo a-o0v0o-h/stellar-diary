@@ -25,6 +25,7 @@ export default function DiaryApp() {
     tutorialStore.getServerSnapshot,
   );
   const [isTutorialReopened, setIsTutorialReopened] = useState(false);
+  const [isHelpGlowing, setIsHelpGlowing] = useState(false);
   const [isInputOpen, setIsInputOpen] = useState(false);
 
   useEffect(() => {
@@ -43,12 +44,15 @@ export default function DiaryApp() {
   };
 
   const closeTutorial = () => {
+    // 初めてのチュートリアルを閉じたときは、見直せる場所を光らせて教える
+    if (!hasSeenTutorial) setIsHelpGlowing(true);
     tutorialStore.markTutorialSeen();
     setIsTutorialReopened(false);
   };
 
   const startWriting = () => {
-    closeTutorial();
+    tutorialStore.markTutorialSeen();
+    setIsTutorialReopened(false);
     setIsInputOpen(true);
   };
 
@@ -63,8 +67,9 @@ export default function DiaryApp() {
 
       <button
         onClick={() => setIsTutorialReopened(true)}
+        onAnimationEnd={() => setIsHelpGlowing(false)}
         aria-label="使い方を見る"
-        className="fixed right-4 top-4 cursor-pointer text-gray-500 hover:text-gray-300"
+        className={`fixed right-4 top-4 cursor-pointer rounded-full text-gray-500 hover:text-gray-300 ${isHelpGlowing ? "help-glow" : ""}`}
       >
         <RiQuestionLine size={22} />
       </button>
