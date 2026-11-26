@@ -1,6 +1,5 @@
 "use client";
 
-import axios from "axios";
 import dayjs, { type Dayjs } from "dayjs";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { RiArrowLeftSLine, RiArrowRightSLine, RiCloseLine } from "react-icons/ri";
@@ -8,6 +7,7 @@ import { toast } from "sonner";
 import type { ReflectResponse } from "@/app/api/reflect/route";
 import { MAX_REFLECTION_DIARIES, MIN_REFLECTION_DIARIES } from "@/lib/constants";
 import type { Diary } from "@/lib/diaryStore";
+import { postJson } from "@/lib/postJson";
 import * as reflectionStore from "@/lib/reflectionStore";
 import { starSize } from "@/lib/star";
 import { dayKey, monthKey, startOfWeek } from "@/lib/date";
@@ -99,28 +99,24 @@ function MonthReflection({ month, diaries }: { month: Dayjs; diaries: Diary[] })
     setIsLoading(true);
     try {
       const sent = ownDiaries.slice(-MAX_REFLECTION_DIARIES);
-      const res = await axios.post<ReflectResponse>(
-        "/api/reflect",
-        {
-          diaries: sent.map(({ content, emotion, energy, intensity, createdAt }) => ({
-            content,
-            emotion,
-            energy,
-            intensity,
-            date: dayKey(createdAt),
-          })),
-        },
-        { validateStatus: () => true },
-      );
+      const data = await postJson<ReflectResponse>("/api/reflect", {
+        diaries: sent.map(({ content, emotion, energy, intensity, createdAt }) => ({
+          content,
+          emotion,
+          energy,
+          intensity,
+          date: dayKey(createdAt),
+        })),
+      });
 
-      if (!res.data?.isOk) {
-        toast.error(ERROR_MESSAGES[res.data?.reason ?? "unavailable"]);
+      if (!data?.isOk) {
+        toast.error(ERROR_MESSAGES[data?.reason ?? "unavailable"]);
         return;
       }
 
       reflectionStore.saveReflection(key, {
-        comment: res.data.comment,
-        quote: res.data.quote,
+        comment: data.comment,
+        quote: data.quote,
         diaryIds: ownIds,
         createdAt: new Date().toISOString(),
       });
