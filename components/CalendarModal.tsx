@@ -172,7 +172,18 @@ function MonthReflection({ month, diaries }: { month: Dayjs; diaries: Diary[] })
               </a>
             </figcaption>
           </figure>
-          {isOutdated && canReflect && button("書き足した日記でふりかえり直す")}
+          {canReflect &&
+            (isOutdated ? (
+              button("書き足した日記でふりかえり直す")
+            ) : (
+              <button
+                onClick={reflect}
+                disabled={isLoading}
+                className="mt-4 cursor-pointer text-xs text-gray-500 underline hover:text-gray-300 disabled:no-underline"
+              >
+                {isLoading ? "星をたどっています..." : "もう一度ふりかえる"}
+              </button>
+            ))}
         </div>
       ) : canReflect ? (
         button("この月をふりかえる")

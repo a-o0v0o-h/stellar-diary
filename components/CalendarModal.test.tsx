@@ -120,7 +120,7 @@ describe("カレンダー", () => {
     cleanup();
     await renderCalendar([...THIS_MONTH, diary("last-month", "2026-10-31T09:00:00")]);
     expect(screen.getByText("やわらかな光のひと月でした。")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: /ふりかえ/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: "この月をふりかえる" })).toBeNull();
   });
 
   it("ふりかえったあとに日記を書き足すと、作り直せる", async () => {
@@ -133,6 +133,21 @@ describe("カレンダー", () => {
     await renderCalendar([...THIS_MONTH, diary("d", "2026-11-26T20:00:00")]);
 
     expect(screen.getByRole("button", { name: "書き足した日記でふりかえり直す" })).toBeTruthy();
+  });
+
+  it("ふりかえったあとも、もう一度つくり直せる", async () => {
+    post.mockResolvedValueOnce(okResponse).mockResolvedValueOnce({
+      data: { ...okResponse.data, comment: "静かな星がまたたくひと月でした。" },
+    });
+    await renderCalendar(THIS_MONTH);
+    fireEvent.click(screen.getByRole("button", { name: "この月をふりかえる" }));
+    await screen.findByText("やわらかな光のひと月でした。");
+
+    fireEvent.click(screen.getByRole("button", { name: "もう一度ふりかえる" }));
+
+    expect(await screen.findByText("静かな星がまたたくひと月でした。")).toBeTruthy();
+    expect(screen.queryByText("やわらかな光のひと月でした。")).toBeNull();
+    expect(post).toHaveBeenCalledTimes(2);
   });
 
   it("失敗したら理由を知らせる", async () => {

@@ -70,6 +70,7 @@ export default function DiaryApp() {
       <button
         onClick={() => setIsCalendarOpen(true)}
         aria-label="カレンダーを開く"
+        data-tour="calendar-button"
         className="fixed right-14 top-4 cursor-pointer text-gray-500 hover:text-gray-300"
       >
         <RiCalendarLine size={22} />

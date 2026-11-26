@@ -40,6 +40,11 @@ const STEPS: Step[] = [
     openDetails: true,
   },
   {
+    title: "カレンダーでふりかえる",
+    body: "日ごとに日記を見返せます。日記が 3 件以上ある月は、AI がひと月を星空になぞらえたひとことと、青空文庫の名言でふりかえります。",
+    target: "calendar-button",
+  },
+  {
     title: "日記を書いてみよう",
     body: "ここから今日のひとことを書けます。書いた内容はこのブラウザの中だけに保存されます。",
     target: "add-button",
