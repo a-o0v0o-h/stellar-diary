@@ -3,6 +3,7 @@
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { RiCalendarLine, RiQuestionLine } from "react-icons/ri";
+import { toast } from "sonner";
 import CalendarModal from "@/components/CalendarModal";
 import InputModal from "@/components/InputModal";
 import StarMap from "@/components/StarMap";
@@ -41,7 +42,7 @@ export default function DiaryApp() {
   }, [diaries, now]);
 
   const handleCreated = (diary: Diary) => {
-    addDiary(diary);
+    if (addDiary(diary)) toast("サンプルの星を片付けました");
     setNow(dayjs().unix());
   };
 
