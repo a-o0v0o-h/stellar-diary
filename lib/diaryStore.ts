@@ -79,8 +79,15 @@ export const subscribe = (listener: () => void) => {
   };
 };
 
-export const addDiary = (diary: Diary) => {
-  write([...getSnapshot(), diary]);
+/**
+ * 日記を保存する。自分の日記を書いたら、お試し用のサンプルは片付ける
+ * @returns サンプルを片付けたかどうか
+ */
+export const addDiary = (diary: Diary): boolean => {
+  const current = getSnapshot();
+  const own = current.filter((d) => !d.isSample);
+  write([...own, diary]);
+  return own.length < current.length;
 };
 
 /**

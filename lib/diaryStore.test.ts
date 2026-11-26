@@ -65,6 +65,20 @@ describe("diaryStore", () => {
     expect(listener).toHaveBeenCalledTimes(2);
   });
 
+  it("自分の日記を書くとサンプルを片付ける", async () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify([diary({ id: "s1", isSample: true }), diary({ id: "s2", isSample: true })]),
+    );
+    const { addDiary, getSnapshot } = await loadStore();
+
+    expect(addDiary(diary({ id: "a" }))).toBe(true);
+    expect(getSnapshot().map((d) => d.id)).toEqual(["a"]);
+
+    expect(addDiary(diary({ id: "b" }))).toBe(false);
+    expect(getSnapshot().map((d) => d.id)).toEqual(["a", "b"]);
+  });
+
   it("localStorage に書き込めないときはメモリ上に保持する", async () => {
     const { addDiary, getSnapshot } = await loadStore();
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
